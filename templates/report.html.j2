@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Relatório de Análise de Segurança — {{ meta.client_name }}</title>
+<style>
+    @page {
+        size: A4;
+        margin: 2.2cm 1.8cm;
+        @bottom-center {
+            content: "Página " counter(page) " de " counter(pages);
+            font-size: 9px;
+            color: #888;
+        }
+    }
+    body {
+        font-family: 'Helvetica Neue', Arial, sans-serif;
+        color: #1a1a1a;
+        font-size: 11px;
+        line-height: 1.5;
+    }
+    h1 { font-size: 24px; color: #0d1b2a; margin-bottom: 4px; }
+    h2 { font-size: 16px; color: #0d1b2a; border-bottom: 2px solid #0d1b2a; padding-bottom: 4px; margin-top: 28px; }
+    h3 { font-size: 13px; color: #1b3a5c; margin-bottom: 2px; }
+    .cover { text-align: center; padding-top: 6cm; page-break-after: always; }
+    .cover h1 { font-size: 30px; }
+    .cover .subtitle { font-size: 14px; color: #555; margin-top: 8px; }
+    .meta-table { margin: 40px auto; text-align: left; width: 70%; border-collapse: collapse; }
+    .meta-table td { padding: 6px 10px; border-bottom: 1px solid #ddd; }
+    .meta-table td:first-child { font-weight: bold; width: 40%; }
+    .disclaimer { margin-top: 60px; font-size: 10px; color: #777; font-style: italic; padding: 0 15%; }
+
+    .score-box { text-align: center; margin: 20px 0; }
+    .score-number { font-size: 48px; font-weight: bold; }
+    .score-level { font-size: 16px; text-transform: uppercase; letter-spacing: 1px; }
+    .level-Crítico, .level-Critico { color: #c0392b; }
+    .level-Alto { color: #e67e22; }
+    .level-Médio, .level-Medio { color: #d4ac0d; }
+    .level-Baixo { color: #27ae60; }
+
+    .sev-table { width: 100%; border-collapse: collapse; margin: 14px 0; }
+    .sev-table td, .sev-table th { padding: 8px; text-align: center; border: 1px solid #ddd; }
+    .sev-table th { background: #0d1b2a; color: white; }
+
+    .risk-item { margin-bottom: 14px; padding: 10px 14px; border-left: 4px solid #c0392b; background: #fdf2f0; }
+    .risk-item .risk-title { font-weight: bold; }
+
+    .finding-block { page-break-inside: avoid; margin-bottom: 26px; border: 1px solid #ddd; border-radius: 4px; padding: 14px 16px; }
+    .finding-header { display: flex; justify-content: space-between; align-items: baseline; }
+    .finding-title { font-size: 14px; font-weight: bold; }
+    .badge { display: inline-block; padding: 2px 10px; border-radius: 10px; font-size: 10px; font-weight: bold; color: white; }
+    .badge-critical { background: #c0392b; }
+    .badge-high { background: #e67e22; }
+    .badge-medium { background: #d4ac0d; }
+    .badge-low { background: #27ae60; }
+    .badge-info { background: #7f8c8d; }
+    .finding-meta { font-size: 10px; color: #666; margin: 4px 0 10px 0; }
+    .finding-meta a { color: #2c5f8a; }
+    .section-label { font-weight: bold; font-size: 10.5px; color: #0d1b2a; margin-top: 10px; display: block; }
+    .evidence-chain { background: #f4f7fa; padding: 8px 12px; border-radius: 4px; margin-top: 4px; }
+    .evidence-chain ol { margin: 4px 0 0 0; padding-left: 18px; }
+    .evidence-detail { background: #fbf8f2; padding: 8px 12px; border-radius: 4px; margin-top: 4px; font-family: monospace; font-size: 9.5px; }
+    .evidence-detail ul { margin: 4px 0 0 0; padding-left: 18px; }
+    .remediation-box { background: #f0f8f0; border-left: 4px solid #27ae60; padding: 8px 12px; margin-top: 8px; }
+    .lgpd-box { background: #eef4fb; border-left: 4px solid #2c5f8a; padding: 8px 12px; margin-top: 8px; font-size: 10px; }
+    .lifecycle-box { background: #f6f6f6; border-left: 4px solid #5b6770; padding: 8px 12px; margin: 8px 0 12px 0; }
+    .lifecycle-box .lifecycle-title { font-weight: bold; }
+
+    .coverage-item { margin-bottom: 8px; }
+    .coverage-item .mod-name { font-weight: bold; font-family: monospace; font-size: 10px; }
+
+    .limitations { background: #fdf6e3; border-left: 4px solid #d4ac0d; padding: 10px 14px; margin-top: 14px; }
+    footer.small-print { font-size: 9px; color: #999; margin-top: 40px; }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════ 1. CAPA E METADADOS ══════════════════ -->
+<div class="cover">
+    <h1>Análise de Vulnerabilidades<br>Automatizada e Validada</h1>
+    <div class="subtitle">Preparado para {{ meta.client_name }}</div>
+
+    <table class="meta-table">
+        <tr><td>Cliente</td><td>{{ meta.client_name }}</td></tr>
+        <tr><td>Escopo testado</td><td>{{ meta.scope }}</td></tr>
+        <tr><td>Alvo</td><td>{{ meta.target }}</td></tr>
+        <tr><td>Pacote(s) contratado(s)</td><td>{{ meta.pack_names | join(', ') if meta.pack_names else 'Completo' }}</td></tr>
+        <tr><td>Data da análise</td><td>{{ meta.scan_date }}</td></tr>
+    </table>
+
+    <div class="disclaimer">{{ meta.disclaimer }}</div>
+</div>
+
+<!-- ══════════════════ 2. RESUMO EXECUTIVO ══════════════════ -->
+<h2>Resumo Executivo</h2>
+
+<div class="score-box">
+    <div class="score-number level-{{ risk.level }}">{{ risk.score }}</div>
+    <div class="score-level level-{{ risk.level }}">Risco {{ risk.level }} (escala 0–100)</div>
+</div>
+
+<table class="sev-table">
+    <tr>
+        <th>Crítico</th><th>Alto</th><th>Médio</th><th>Baixo</th>
+    </tr>
+    <tr>
+        <td>{{ risk.severity_counts.get('critical', 0) }}</td>
+        <td>{{ risk.severity_counts.get('high', 0) }}</td>
+        <td>{{ risk.severity_counts.get('medium', 0) }}</td>
+        <td>{{ risk.severity_counts.get('low', 0) }}</td>
+    </tr>
+</table>
+
+<h3>Principais riscos identificados</h3>
+{% if top_business_risks %}
+    {% for risk_item in top_business_risks %}
+    <div class="risk-item">
+        <div class="risk-title">{{ loop.index }}. {{ risk_item.business_risk_description }}</div>
+    </div>
+    {% endfor %}
+{% else %}
+    <p>Nenhum achado de severidade relevante foi identificado no escopo testado.</p>
+{% endif %}
+
+<!-- ══════════════════ 3. METODOLOGIA ══════════════════ -->
+<h2>Metodologia</h2>
+
+<p>
+    A análise foi realizada de forma automatizada, através de um motor que decide
+    dinamicamente quais verificações executar com base no que descobre durante o
+    próprio scan — nunca uma lista fixa e idêntica pra todo alvo.
+</p>
+
+<p><strong>Diferencial de validação:</strong> cada achado listado neste relatório
+foi confirmado por observação de EFEITO REAL — login bem-sucedido com credencial
+forjada, requisição de callback recebida de volta, resposta de servidor
+específica reproduzida — não apenas por assinatura de padrão ou código de status
+HTTP isolado. Isso é o que mantém a taxa de falso positivo baixa.</p>
+
+<h3>Módulos executados nesta análise</h3>
+{% if coverage %}
+    {% for item in coverage %}
+    <div class="coverage-item">
+        <span class="mod-name">{{ item.module }}</span> — {{ item.summary or item.display_name }}
+    </div>
+    {% endfor %}
+{% else %}
+    <p>Detalhe de módulo não disponível para este relatório.</p>
+{% endif %}
+
+<div class="limitations">
+    <strong>Limitações declaradas:</strong> esta análise não cobre lógica de
+    negócio complexa nem exploração manual encadeada por um operador humano.
+    Ela reflete o que pode ser confirmado de forma automatizada e explicável —
+    resultado consistente e reproduzível, mas não substitui uma avaliação manual
+    completa por um especialista quando o contexto de negócio exigir.
+</div>
+
+<!-- ══════════════════ 4. ACHADOS TÉCNICOS DETALHADOS ══════════════════ -->
+<h2>Achados Técnicos Detalhados</h2>
+
+{% if findings %}
+    {% for f in findings %}
+    <div class="finding-block">
+        <div class="finding-header">
+            <span class="finding-title">{{ f.title }}</span>
+            <span class="badge badge-{{ f.severity }}">{{ f.severity | upper }}</span>
+        </div>
+        <div class="finding-meta">
+            {{ f.owasp }}
+            {% if f.cwe_url %} · <a href="{{ f.cwe_url }}">{{ f.cwe }}</a>{% else %} · {{ f.cwe }}{% endif %}
+            · Ativo: {{ f.endpoint or meta.target }}
+        </div>
+
+        <div class="lifecycle-box">
+            <div class="lifecycle-title">Ciclo de vida: {{ f.lifecycle_label }}</div>
+            <div>{{ f.lifecycle_detail }}</div>
+        </div>
+
+        <span class="section-label">Descrição técnica</span>
+        <p>{{ f.description }}</p>
+
+        {% if f.evidence_narrative %}
+        <span class="section-label">Evidência de validação</span>
+        <div class="evidence-chain">
+            <ol>
+                {% for step in f.evidence_narrative %}
+                <li>{{ step }}</li>
+                {% endfor %}
+            </ol>
+        </div>
+        {% endif %}
+
+        {% if f.evidence_lines %}
+        <span class="section-label">Como o TRACE confirmou (detalhe técnico)</span>
+        <div class="evidence-detail">
+            <ul>
+                {% for line in f.evidence_lines %}
+                <li>{{ line }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        <span class="section-label">Recomendação de correção</span>
+        <div class="remediation-box">{{ f.remediation }}</div>
+
+        {% if f.lgpd_note %}
+        <span class="section-label">LGPD</span>
+        <div class="lgpd-box">{{ f.lgpd_note }}</div>
+        {% endif %}
+    </div>
+    {% endfor %}
+{% else %}
+    <p>Nenhum achado técnico foi confirmado no escopo e pacote testado.</p>
+{% endif %}
+
+{% if meta.lgpd_disclaimer %}
+<div class="limitations">
+    <strong>Sobre as referências à LGPD:</strong> {{ meta.lgpd_disclaimer }}
+</div>
+{% endif %}
+
+<footer class="small-print">
+    Relatório gerado automaticamente pelo TRACE em {{ meta.scan_date }}.
+    {{ meta.disclaimer }}
+</footer>
+
+</body>
+</html>

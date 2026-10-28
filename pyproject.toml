@@ -1,0 +1,64 @@
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "trace-scanner"
+version = "0.1.0"
+description = "TRACE -- Transparent Reconnaissance & Attack Correlation Engine: triagem explicável de superfície de ataque com validação por efeito real."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "Proprietary" }
+authors = [{ name = "Guilherme" }]
+
+# dependências CORE -- necessárias mesmo rodando um único --pack, porque
+# load_modules() IMPORTA todo arquivo em modules/*.py antes de filtrar por
+# pacote (ver knowledge/discovery.py). Faltando uma dessas, o import de
+# QUALQUER módulo que a use falha -- não é isolado por pacote.
+dependencies = [
+    "requests>=2.34.2",
+    "beautifulsoup4>=4.15.0",
+    "urllib3>=2.7.0",
+    "PyYAML>=6.0.3",
+    "packaging>=26.3",
+    "python-dotenv>=1.2.3",
+]
+
+# extras opcionais -- cada um corresponde a uma feature com degradação
+# graciosa já implementada no código (ver knowledge/discovery.py: falha de
+# import de UM módulo só desabilita aquele módulo, com aviso claro, nunca
+# derruba o scan inteiro). Instalar sem extra nenhum ainda dá um TRACE
+# funcional -- só sem essas features específicas.
+[project.optional-dependencies]
+audit = ["pyarrow>=15.0.0"]                    # core/audit.py -- sessão gravada em Parquet com hash SHA-256
+observability = [                              # observability.py -- trace/métrica via OpenTelemetry
+    "opentelemetry-api>=1.44.0",
+    "opentelemetry-sdk>=1.44.0",
+    "opentelemetry-exporter-otlp-proto-http>=1.44.0",
+]
+report = ["Jinja2>=3.1.6", "weasyprint>=70.0"] # core/report_generator.py -- relatório de cliente em PDF (--client-report)
+js-crawler = ["playwright>=1.56.0"]            # modules/js_rendering_crawler.py -- descoberta em SPA (Angular/React/Vue)
+tls = ["cryptography>=46.0.4"]                 # modules/service_version_enumerator.py -- parsing de certificado TLS
+all = [
+    "pyarrow>=15.0.0",
+    "opentelemetry-api>=1.44.0",
+    "opentelemetry-sdk>=1.44.0",
+    "opentelemetry-exporter-otlp-proto-http>=1.44.0",
+    "Jinja2>=3.1.6",
+    "weasyprint>=70.0",
+    "playwright>=1.56.0",
+    "cryptography>=46.0.4",
+]
+
+[project.scripts]
+trace = "main:main"
+
+[tool.setuptools]
+py-modules = ["main", "observability"]
+
+[tool.setuptools.packages.find]
+include = ["core*", "knowledge*", "modules*", "utils*", "config*", "templates*"]
+
+[tool.setuptools.package-data]
+config = ["*.yaml"]
+templates = ["*.j2"]

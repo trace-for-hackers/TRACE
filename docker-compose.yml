@@ -1,0 +1,61 @@
+services:
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+    depends_on:
+      - tempo
+      - loki
+      - prometheus
+
+  tempo:
+    image: grafana/tempo:3.0.0
+    command:
+      - "-config.file=/etc/tempo/tempo.yaml"
+    volumes:
+      - type: bind
+        source: ./tempo.yaml
+        target: /etc/tempo/tempo.yaml
+        read_only: true
+        bind:
+          create_host_path: false
+      - tempo-data:/tmp/tempo
+    ports:
+      - "3200:3200"
+
+  loki:
+    image: grafana/loki:latest
+    command: -config.file=/etc/loki/local-config.yaml
+    ports:
+      - "3100:3100"
+    volumes:
+      - loki-data:/loki
+
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+
+  alloy:
+    image: grafana/alloy:latest
+    command:
+      - run
+      - /etc/alloy/config.alloy
+    ports:
+      - "4317:4317"
+      - "4318:4318"
+    volumes:
+      - ./config.alloy:/etc/alloy/config.alloy
+    depends_on:
+      - tempo
+      - loki
+      - prometheus
+
+volumes:
+  grafana-data:
+  tempo-data:
+  loki-data:

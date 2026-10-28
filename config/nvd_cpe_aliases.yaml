@@ -1,0 +1,20 @@
+# Aliases conservadores para tecnologias já representadas pelo TRACE.
+# Adicione novos aliases somente depois de verificar o CPE oficial na NVD.
+wordpress:
+  vendor: wordpress
+  product: wordpress
+apache:
+  vendor: apache
+  product: http_server
+nginx:
+  vendor: nginx
+  product: nginx
+openssl:
+  vendor: openssl
+  product: openssl
+jquery:
+  vendor: jquery
+  product: jquery
+lodash:
+  vendor: lodash
+  product: lodash

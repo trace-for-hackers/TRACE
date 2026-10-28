@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.pyc
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+
+# ambiente virtual
+venv/
+.venv/
+
+# banco de dado do scan e auditoria -- nunca deveria ir pro repositório
+# (contém achado de scan real, potencialmente contra alvo de cliente)
+*.db
+.trace/
+audit/
+
+# cache de feed (Wordfence, NVD)
+.cache/
+
+# saída de relatório de cliente -- pode conter dado sensível do cliente
+relatorios/
+*.pdf
+!docs/**/*.pdf
+
+# variável de ambiente com segredo (NVD_API_KEY, etc.)
+.env
+
+# artefato de sistema operacional
+.DS_Store
